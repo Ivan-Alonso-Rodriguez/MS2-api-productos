@@ -3,7 +3,7 @@ service: MS2-api-productos
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs16.x
   memorySize: 1024
   timeout: 30
   environment:
