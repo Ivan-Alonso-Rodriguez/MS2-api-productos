@@ -65,19 +65,9 @@ resources:
           - AttributeName: codigo
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+        
     ImagenesBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ms2-productos-imgs
-
-    ImagenesBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref ImagenesBucket
-        PolicyDocument:
-          Statement:
-            - Effect: Allow
-              Principal: "*"
-              Action: "s3:GetObject"
-              Resource: "arn:aws:s3:::ms2-productos-imgs/*"
 
