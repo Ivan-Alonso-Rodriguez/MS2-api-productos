@@ -65,3 +65,8 @@ resources:
           - AttributeName: codigo
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+    ImagenesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ms2-productos-imgs
+        AccessControl: PublicRead
