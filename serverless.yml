@@ -1,0 +1,67 @@
+org: ivanrodriguezperez
+service: MS2-api-productos
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 1024
+  timeout: 30
+  environment:
+    JWT_SECRET: clave_de_prueba
+  iam:
+    role: arn:aws:iam::748213590633:role/LabRole
+
+functions:
+  crearProducto:
+    handler: lambdas/crearProducto.crearProducto
+    events:
+      - http:
+          path: productos/crear
+          method: post
+          cors: true
+
+  listarProductos:
+    handler: lambdas/listarProductos.listarProductos
+    events:
+      - http:
+          path: productos/listar
+          method: get
+          cors: true
+
+  buscarProducto:
+    handler: lambdas/buscarProducto.buscarProducto
+    events:
+      - http:
+          path: productos/buscar/{codigo}
+          method: get
+          cors: true
+
+  modificarProducto:
+    handler: lambdas/modificarProducto.modificarProducto
+    events:
+      - http:
+          path: productos/modificar
+          method: put
+          cors: true
+
+  eliminarProducto:
+    handler: lambdas/eliminarProducto.eliminarProducto
+    events:
+      - http:
+          path: productos/eliminar
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    ProductosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: t_MS2_productos
+        AttributeDefinitions:
+          - AttributeName: codigo
+            AttributeType: S
+        KeySchema:
+          - AttributeName: codigo
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

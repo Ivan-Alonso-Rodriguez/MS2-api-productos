@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: MS2 - API Productos
+  version: "1.0.0"
+  description: API protegida por token para gestión de productos por tenant
+
+paths:
+  /productos/crear:
+    post:
+      summary: Crear un producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+                precio:
+                  type: number
+      responses:
+        '200':
+          description: Producto creado exitosamente
+      security:
+        - bearerAuth: []
+
+  /productos/listar:
+    get:
+      summary: Listar productos del tenant autenticado
+      responses:
+        '200':
+          description: Lista de productos
+      security:
+        - bearerAuth: []
+
+  /productos/buscar/{codigo}:
+    get:
+      summary: Buscar producto por código
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto encontrado
+      security:
+        - bearerAuth: []
+
+  /productos/modificar:
+    put:
+      summary: Modificar un producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+                precio:
+                  type: number
+      responses:
+        '200':
+          description: Producto actualizado
+      security:
+        - bearerAuth: []
+
+  /productos/eliminar:
+    delete:
+      summary: Eliminar un producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+      responses:
+        '200':
+          description: Producto eliminado
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
