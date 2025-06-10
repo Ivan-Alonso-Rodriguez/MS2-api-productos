@@ -1,8 +1,0 @@
-{
-  "name": "ms2-api-productos",
-  "version": "1.0.0",
-  "dependencies": {
-    "aws-sdk": "^2.1370.0",
-    "jsonwebtoken": "^9.0.0"
-  }
-}
