@@ -13,7 +13,7 @@ module.exports.eliminarProducto = async (event) => {
 
   // Primero obtenemos el producto
   const obtenerParams = {
-    TableName: 't_MS2_productos',
+    TableName: process.env.PRODUCTOS_TABLE,
     Key: { codigo }
   };
 
@@ -36,7 +36,7 @@ module.exports.eliminarProducto = async (event) => {
 
   // Eliminamos el producto
   const eliminarParams = {
-    TableName: 't_MS2_productos',
+    TableName: process.env.PRODUCTOS_TABLE,
     Key: { codigo }
   };
 
