@@ -1,60 +1,18 @@
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const s3 = new AWS.S3();
+const { validarToken } = require('../middleware/validarToken'); // Mismo validador de token
 
-// Validación de token sin jsonwebtoken
-const validarToken = async (headers) => {
-  const token = headers['x-auth-token'];
-  if (!token) {
-    return {
-      ok: false,
-      respuesta: {
-        statusCode: 401,
-        body: JSON.stringify({ mensaje: 'Token no proporcionado' })
-      }
-    };
-  }
-
-  const res = await dynamodb.get({
-    TableName: 't_MS1_tokens_acceso',
-    Key: { token }
-  }).promise();
-
-  if (!res.Item) {
-    return {
-      ok: false,
-      respuesta: {
-        statusCode: 403,
-        body: JSON.stringify({ mensaje: 'Token no existe' })
-      }
-    };
-  }
-
-  const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
-  if (now > res.Item.expires) {
-    return {
-      ok: false,
-      respuesta: {
-        statusCode: 403,
-        body: JSON.stringify({ mensaje: 'Token expirado' })
-      }
-    };
-  }
-
-  return {
-    ok: true,
-    datos: res.Item
-  };
-};
-
-// Crear producto
 module.exports.crearProducto = async (event) => {
+  // Validar el token de forma obligatoria
   const validacion = await validarToken(event.headers);
   if (!validacion.ok) return validacion.respuesta;
 
   const { codigo, nombre, descripcion, precio, imagen_base64 } = JSON.parse(event.body);
 
   let imagen_url = null;
+
+  // Subir imagen si se incluye
   if (imagen_base64) {
     const buffer = Buffer.from(imagen_base64, 'base64');
     const s3Params = {
@@ -69,22 +27,22 @@ module.exports.crearProducto = async (event) => {
     imagen_url = `https://ms2-productos-imgs.s3.amazonaws.com/${codigo}.jpg`;
   }
 
+  // Construir item del producto
   const producto = {
     codigo,
     tenant_id: validacion.datos.tenant_id,
-    user_id: validacion.datos.user_id, // importante si luego quieres filtrar
+    user_id: validacion.datos.user_id,
     nombre,
     descripcion,
     precio,
     ...(imagen_url && { imagen_url })
   };
 
-  const paramsDynamo = {
+  // Guardar en DynamoDB
+  await dynamodb.put({
     TableName: 't_MS2_productos',
     Item: producto
-  };
-
-  await dynamodb.put(paramsDynamo).promise();
+  }).promise();
 
   return {
     statusCode: 200,
