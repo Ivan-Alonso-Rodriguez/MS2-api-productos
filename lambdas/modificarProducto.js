@@ -14,12 +14,10 @@ module.exports.modificarProducto = async (event) => {
   const bucketName = process.env.IMAGENES_BUCKET;
 
   // Verificar existencia y dueño
-  const obtenerParams = {
+  const resultado = await dynamodb.get({
     TableName: tableName,
     Key: { codigo }
-  };
-
-  const resultado = await dynamodb.get(obtenerParams).promise();
+  }).promise();
 
   if (!resultado.Item) {
     return {
@@ -35,20 +33,32 @@ module.exports.modificarProducto = async (event) => {
     };
   }
 
-  let updateExpression = 'set nombre = :n, descripcion = :d, precio = :p';
-  let expressionAttributeValues = {
-    ':n': nombre,
-    ':d': descripcion,
-    ':p': precio
-  };
+  // Construcción dinámica de UpdateExpression
+  let updateExpression = 'set';
+  const expressionAttributeValues = {};
+  const expressionAttributeNames = {};
 
-  // Agregar cantidad si viene incluida
+  if (nombre !== undefined) {
+    updateExpression += ' #n = :n,';
+    expressionAttributeNames['#n'] = 'nombre';
+    expressionAttributeValues[':n'] = nombre;
+  }
+
+  if (descripcion !== undefined) {
+    updateExpression += ' descripcion = :d,';
+    expressionAttributeValues[':d'] = descripcion;
+  }
+
+  if (precio !== undefined) {
+    updateExpression += ' precio = :p,';
+    expressionAttributeValues[':p'] = precio;
+  }
+
   if (cantidad !== undefined) {
-    updateExpression += ', cantidad = :c';
+    updateExpression += ' cantidad = :c,';
     expressionAttributeValues[':c'] = cantidad;
   }
 
-  // Si se proporciona nueva imagen
   if (imagen_base64) {
     if (resultado.Item.imagen_key) {
       try {
@@ -72,9 +82,20 @@ module.exports.modificarProducto = async (event) => {
       ContentType: 'image/jpeg'
     }).promise();
 
-    updateExpression += ', imagen_key = :img';
+    updateExpression += ' imagen_key = :img,';
     expressionAttributeValues[':img'] = imagen_key;
   }
+
+  // Si no hay nada para actualizar
+  if (updateExpression === 'set') {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ msg: 'No se enviaron campos válidos para actualizar' })
+    };
+  }
+
+  // Eliminar coma final
+  updateExpression = updateExpression.slice(0, -1);
 
   const params = {
     TableName: tableName,
@@ -82,6 +103,10 @@ module.exports.modificarProducto = async (event) => {
     UpdateExpression: updateExpression,
     ExpressionAttributeValues: expressionAttributeValues
   };
+
+  if (Object.keys(expressionAttributeNames).length > 0) {
+    params.ExpressionAttributeNames = expressionAttributeNames;
+  }
 
   await dynamodb.update(params).promise();
 
