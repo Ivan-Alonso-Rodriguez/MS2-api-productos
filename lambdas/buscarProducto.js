@@ -3,10 +3,13 @@ const { validarToken } = require('../middleware/validarToken');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.buscarProducto = async (event) => {
+  // Intentamos validar el token pero no es obligatorio
+  let userId = null;
   const validacion = await validarToken(event.headers);
-  if (!validacion.ok) return validacion.respuesta;
+  if (validacion.ok) {
+    userId = validacion.datos.user_id;
+  }
 
-  const userId = validacion.datos.user_id;
   const codigo = event.pathParameters.codigo;
 
   const params = {
@@ -19,14 +22,7 @@ module.exports.buscarProducto = async (event) => {
   if (!data.Item) {
     return {
       statusCode: 404,
-      body: JSON.stringify({ msg: 'Producto no encontrado' })
-    };
-  }
-
-  if (data.Item.user_id !== userId) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({ msg: 'No tienes acceso a este producto' })
+      body: JSON.stringify({ mensaje: 'Producto no encontrado' })
     };
   }
 
