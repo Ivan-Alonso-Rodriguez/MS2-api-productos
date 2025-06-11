@@ -49,4 +49,18 @@ module.exports.crearProducto = async (event) => {
     imagen_url = s3.getSignedUrl('getObject', {
       Bucket: process.env.IMAGENES_BUCKET,
       Key: imagen_key,
-      Expire
+      Expires: 60 * 5
+    });
+  }
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      mensaje: 'Producto creado correctamente',
+      producto: {
+        ...producto,
+        ...(imagen_url && { imagen_url })
+      }
+    })
+  };
+};
