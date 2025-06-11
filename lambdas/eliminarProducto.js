@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const { validarToken } = require('../middleware/validarToken');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
+const s3 = new AWS.S3();
 
 module.exports.eliminarProducto = async (event) => {
   // Validamos el token
@@ -34,7 +35,21 @@ module.exports.eliminarProducto = async (event) => {
     };
   }
 
-  // Eliminamos el producto
+  // Si existe imagen_key, eliminamos la imagen del bucket S3
+  if (resultado.Item.imagen_key) {
+    const s3Params = {
+      Bucket: process.env.IMAGENES_BUCKET,
+      Key: resultado.Item.imagen_key
+    };
+
+    try {
+      await s3.deleteObject(s3Params).promise();
+    } catch (err) {
+      console.warn("Error al eliminar imagen S3 (continuando de todos modos):", err.message);
+    }
+  }
+
+  // Eliminamos el producto de DynamoDB
   const eliminarParams = {
     TableName: process.env.PRODUCTOS_TABLE,
     Key: { codigo }
