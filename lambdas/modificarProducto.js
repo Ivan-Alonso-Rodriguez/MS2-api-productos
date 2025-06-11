@@ -10,9 +10,11 @@ module.exports.modificarProducto = async (event) => {
 
   const { codigo, nombre, descripcion, precio } = JSON.parse(event.body);
 
+  const tableName = process.env.PRODUCTOS_TABLE;
+
   // Verificamos que el producto exista y sea del usuario
   const obtenerParams = {
-    TableName: 't_MS2_productos',
+    TableName: tableName,
     Key: { codigo }
   };
 
@@ -34,7 +36,7 @@ module.exports.modificarProducto = async (event) => {
 
   // Si el producto es del usuario, se permite modificar
   const params = {
-    TableName: 't_MS2_productos',
+    TableName: tableName,
     Key: { codigo },
     UpdateExpression: 'set nombre = :n, descripcion = :d, precio = :p',
     ExpressionAttributeValues: {
