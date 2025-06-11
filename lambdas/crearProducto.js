@@ -35,6 +35,7 @@ module.exports.crearProducto = async (event) => {
     nombre,
     descripcion,
     precio,
+    cantidad: cantidad ?? 1, // default a 1 si no lo manda
     ...(imagen_key && { imagen_key })
   };
 
