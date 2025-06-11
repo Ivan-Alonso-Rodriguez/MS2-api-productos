@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: API Productos - Proyecto Final
+  version: 1.0.0
+  description: API para gestión de productos en DynamoDB, con imágenes en S3 y protección por token
+
+paths:
+  /productos/crear:
+    post:
+      summary: Crear nuevo producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [codigo, nombre, descripcion, precio, cantidad]
+              properties:
+                codigo:
+                  type: string
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+                precio:
+                  type: number
+                cantidad:
+                  type: integer
+                imagen_base64:
+                  type: string
+      responses:
+        '200':
+          description: Producto creado exitosamente
+
+  /productos/listar:
+    get:
+      summary: Listar productos disponibles
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: nombre
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de productos
+
+  /productos/modificar:
+    put:
+      summary: Modificar producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [codigo]
+              properties:
+                codigo:
+                  type: string
+                nombre:
+                  type: string
+                descripcion:
+                  type: string
+                precio:
+                  type: number
+                cantidad:
+                  type: integer
+                imagen_base64:
+                  type: string
+      responses:
+        '200':
+          description: Producto modificado exitosamente
+
+  /productos/eliminar/{codigo}:
+    delete:
+      summary: Eliminar producto por código
+      parameters:
+        - in: path
+          name: codigo
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto eliminado correctamente
+
+  /productos/buscar/{codigo}:
+    get:
+      summary: Buscar producto por código
+      parameters:
+        - in: path
+          name: codigo
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto encontrado
+        '404':
+          description: Producto no encontrado
