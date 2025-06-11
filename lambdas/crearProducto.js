@@ -6,8 +6,8 @@ const { validarToken } = require('../middleware/validarToken');
 module.exports.crearProducto = async (event) => {
   const validacion = await validarToken(event.headers);
   if (!validacion.ok) return validacion.respuesta;
-
-  const { codigo, nombre, descripcion, precio, imagen_base64 } = JSON.parse(event.body);
+  
+  const { codigo, nombre, descripcion, precio, cantidad, imagen_base64 } = JSON.parse(event.body);
 
   let imagen_key = null;
 
@@ -35,7 +35,7 @@ module.exports.crearProducto = async (event) => {
     nombre,
     descripcion,
     precio,
-    cantidad: cantidad ?? 1, // default a 1 si no lo manda
+    cantidad: (typeof cantidad === 'number' && cantidad >= 1) ? cantidad : 1, // default a 1 si no lo manda
     ...(imagen_key && { imagen_key })
   };
 
