@@ -10,6 +10,7 @@ provider:
     JWT_SECRET: clave_de_prueba
     PRODUCTOS_TABLE: ${sls:stage}-t_MS2_productos
     IMAGENES_BUCKET: ${sls:stage}-ms2-productos-imgs
+    TOKENS_TABLE: ${sls:stage}-t_MS1_tokens_acceso
   iam:
     role: arn:aws:iam::748213590633:role/LabRole
 
