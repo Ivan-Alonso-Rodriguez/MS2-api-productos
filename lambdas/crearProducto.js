@@ -14,7 +14,7 @@ module.exports.crearProducto = async (event) => {
   // Subir imagen si se incluye
   if (imagen_base64) {
     const buffer = Buffer.from(imagen_base64, 'base64');
-    imagen_key = `${codigo}.jpg`;
+    imagen_key = `${codigo}.jpeg`;
 
     const s3Params = {
       Bucket: process.env.IMAGENES_BUCKET,
