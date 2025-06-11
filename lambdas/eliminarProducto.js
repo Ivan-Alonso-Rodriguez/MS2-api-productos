@@ -3,20 +3,47 @@ const { validarToken } = require('../middleware/validarToken');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.eliminarProducto = async (event) => {
-  const validacion = validarToken(event.headers);
+  // Validamos el token
+  const validacion = await validarToken(event.headers);
   if (!validacion.ok) return validacion.respuesta;
+
+  const userId = validacion.datos.user_id;
 
   const { codigo } = JSON.parse(event.body);
 
-  const params = {
+  // Primero obtenemos el producto
+  const obtenerParams = {
     TableName: 't_MS2_productos',
     Key: { codigo }
   };
 
-  await dynamodb.delete(params).promise();
+  const resultado = await dynamodb.get(obtenerParams).promise();
+
+  if (!resultado.Item) {
+    return {
+      statusCode: 404,
+      body: JSON.stringify({ msg: 'Producto no encontrado' })
+    };
+  }
+
+  // Verificamos si el producto pertenece al usuario
+  if (resultado.Item.user_id !== userId) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ msg: 'No tienes permiso para eliminar este producto' })
+    };
+  }
+
+  // Eliminamos el producto
+  const eliminarParams = {
+    TableName: 't_MS2_productos',
+    Key: { codigo }
+  };
+
+  await dynamodb.delete(eliminarParams).promise();
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ msg: 'Producto eliminado' })
+    body: JSON.stringify({ msg: 'Producto eliminado exitosamente' })
   };
 };
