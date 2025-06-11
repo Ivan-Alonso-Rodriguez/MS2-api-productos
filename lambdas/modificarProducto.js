@@ -8,13 +8,12 @@ module.exports.modificarProducto = async (event) => {
   if (!validacion.ok) return validacion.respuesta;
 
   const userId = validacion.datos.user_id;
-
-  const { codigo, nombre, descripcion, precio, imagen_base64 } = JSON.parse(event.body);
+  const { codigo, nombre, descripcion, precio, cantidad, imagen_base64 } = JSON.parse(event.body);
 
   const tableName = process.env.PRODUCTOS_TABLE;
   const bucketName = process.env.IMAGENES_BUCKET;
 
-  // Verificamos que el producto exista y sea del usuario
+  // Verificar existencia y dueño
   const obtenerParams = {
     TableName: tableName,
     Key: { codigo }
@@ -43,9 +42,14 @@ module.exports.modificarProducto = async (event) => {
     ':p': precio
   };
 
-  // Si se proporciona una nueva imagen, reemplazamos la anterior
+  // Agregar cantidad si viene incluida
+  if (cantidad !== undefined) {
+    updateExpression += ', cantidad = :c';
+    expressionAttributeValues[':c'] = cantidad;
+  }
+
+  // Si se proporciona nueva imagen
   if (imagen_base64) {
-    // Eliminar imagen anterior si existe
     if (resultado.Item.imagen_key) {
       try {
         await s3.deleteObject({
@@ -60,7 +64,6 @@ module.exports.modificarProducto = async (event) => {
     const imagen_key = `${codigo}.jpeg`;
     const buffer = Buffer.from(imagen_base64, 'base64');
 
-    // Subir nueva imagen
     await s3.putObject({
       Bucket: bucketName,
       Key: imagen_key,
@@ -69,12 +72,10 @@ module.exports.modificarProducto = async (event) => {
       ContentType: 'image/jpeg'
     }).promise();
 
-    // Agregar imagen_key al update
     updateExpression += ', imagen_key = :img';
     expressionAttributeValues[':img'] = imagen_key;
   }
 
-  // Actualizar en DynamoDB
   const params = {
     TableName: tableName,
     Key: { codigo },
