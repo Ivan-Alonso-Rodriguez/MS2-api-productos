@@ -21,7 +21,7 @@ module.exports.listarProductos = async (event) => {
   const soloMios = event.queryStringParameters?.soloMios === 'true';
 
   const params = {
-    TableName: 't_MS2_productos',
+    TableName: process.env.PRODUCTOS_TABLE,
     Limit: limit
   };
 
