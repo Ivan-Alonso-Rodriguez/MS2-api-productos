@@ -14,8 +14,10 @@ module.exports.validarToken = async (headers) => {
   }
 
   try {
+    const tableName = process.env.TOKENS_TABLE;
+
     const res = await dynamodb.get({
-      TableName: 't_MS1_tokens_acceso',
+      TableName: tableName,
       Key: { token }
     }).promise();
 
@@ -42,7 +44,7 @@ module.exports.validarToken = async (headers) => {
 
     return {
       ok: true,
-      datos: res.Item // Incluye tenant_id, user_id, etc. si lo guardaste
+      datos: res.Item // Incluye user_id, tenant_id, etc. si los guardaste
     };
   } catch (err) {
     return {
