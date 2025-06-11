@@ -17,7 +17,7 @@ module.exports.crearProducto = async (event) => {
     imagen_key = `${codigo}.jpg`;
 
     const s3Params = {
-      Bucket: 'ms2-productos-imgs',
+      Bucket: process.env.IMAGENES_BUCKET,
       Key: imagen_key,
       Body: buffer,
       ContentEncoding: 'base64',
@@ -35,33 +35,18 @@ module.exports.crearProducto = async (event) => {
     nombre,
     descripcion,
     precio,
-    ...(imagen_key && { imagen_key }) // Guardamos solo el nombre del archivo
+    ...(imagen_key && { imagen_key })
   };
 
   await dynamodb.put({
-    TableName: 't_MS2_productos',
+    TableName: process.env.PRODUCTOS_TABLE,
     Item: producto
   }).promise();
 
   // Generar URL firmada si hay imagen
   let imagen_url = null;
   if (imagen_key) {
-    const signedUrl = s3.getSignedUrl('getObject', {
-      Bucket: 'ms2-productos-imgs',
+    imagen_url = s3.getSignedUrl('getObject', {
+      Bucket: process.env.IMAGENES_BUCKET,
       Key: imagen_key,
-      Expires: 60 * 5 // válido por 5 minutos
-    });
-    imagen_url = signedUrl;
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      mensaje: 'Producto creado correctamente',
-      producto: {
-        ...producto,
-        ...(imagen_url && { imagen_url }) // Incluimos URL firmada al cliente
-      }
-    })
-  };
-};
+      Expire
