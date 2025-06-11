@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.validarToken = async (headers) => {
-  const token = headers['x-auth-token'];
+  const token = headers['x-auth-token'] || headers['authorization'];
   if (!token) {
     return {
       ok: false,
