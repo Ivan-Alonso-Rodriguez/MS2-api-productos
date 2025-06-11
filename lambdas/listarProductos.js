@@ -16,8 +16,6 @@ module.exports.listarProductos = async (event) => {
 
   const params = {
     TableName: 't_MS2_productos',
-    FilterExpression: 'tenant_id = :tid',
-    ExpressionAttributeValues: { ':tid': validacion.datos.tenant_id },
     Limit: limit
   };
 
