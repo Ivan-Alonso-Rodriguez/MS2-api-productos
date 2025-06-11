@@ -8,6 +8,8 @@ provider:
   timeout: 30
   environment:
     JWT_SECRET: clave_de_prueba
+    PRODUCTOS_TABLE: ${sls:stage}-t_MS2_productos
+    IMAGENES_BUCKET: ${sls:stage}-ms2-productos-imgs
   iam:
     role: arn:aws:iam::748213590633:role/LabRole
 
@@ -57,7 +59,7 @@ resources:
     ProductosTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: t_MS2_productos
+        TableName: ${self:provider.environment.PRODUCTOS_TABLE}
         AttributeDefinitions:
           - AttributeName: codigo
             AttributeType: S
@@ -69,5 +71,4 @@ resources:
     ImagenesBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ms2-productos-imgs
-
+        BucketName: ${self:provider.environment.IMAGENES_BUCKET}
