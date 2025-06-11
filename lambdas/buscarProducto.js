@@ -13,21 +13,29 @@ module.exports.buscarProducto = async (event) => {
   const codigo = event.pathParameters.codigo;
 
   const params = {
-    TableName: 't_MS2_productos',
+    TableName: process.env.PRODUCTOS_TABLE,
     Key: { codigo }
   };
 
-  const data = await dynamodb.get(params).promise();
+  try {
+    const data = await dynamodb.get(params).promise();
 
-  if (!data.Item) {
+    if (!data.Item) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ mensaje: 'Producto no encontrado' })
+      };
+    }
+
     return {
-      statusCode: 404,
-      body: JSON.stringify({ mensaje: 'Producto no encontrado' })
+      statusCode: 200,
+      body: JSON.stringify(data.Item)
+    };
+  } catch (err) {
+    console.error("Error al buscar producto:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ mensaje: 'Error al buscar el producto', detalle: err.message })
     };
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(data.Item)
-  };
 };
